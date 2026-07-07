@@ -7,7 +7,6 @@ DB.price.forEach(p => {
 });
 
 const hotelSel = document.getElementById('hotelSel');
-const roomSel = document.getElementById('roomSel');
 const guestInput = document.getElementById('guestInput');
 const goBtn = document.getElementById('goBtn');
 const resultPanel = document.getElementById('resultPanel');
@@ -106,27 +105,24 @@ nextMonthBtn.addEventListener('click', () => {
 initCalendarView();
 renderCalendar();
 
-hotelSel.addEventListener('change', () => {
-  const h = hotelSel.value;
-  roomSel.innerHTML = '';
-  if(!h){
-    roomSel.disabled = true;
-    roomSel.innerHTML = '<option value="">先にホテルを選んでください</option>';
-    return;
-  }
-  roomSel.disabled = false;
-  const rooms = hotelRooms[h] || [];
-  const placeholder = document.createElement('option');
-  placeholder.value = ''; placeholder.textContent = 'お部屋タイプを選択';
-  roomSel.appendChild(placeholder);
-  rooms.forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = r; opt.textContent = r;
-    roomSel.appendChild(opt);
-  });
-});
-
 function fmt(n){ return n.toLocaleString('ja-JP'); }
+
+// Always show room types in a consistent order: シングル, ツイン, トリプル first,
+// then any other room names (e.g. ANA's コンフォート/プレミアム variants) keep their
+// original relative order from the data.
+const ROOM_ORDER = ['シングル', 'ツイン', 'トリプル'];
+function roomSortKey(roomName){
+  for(let i = 0; i < ROOM_ORDER.length; i++){
+    if(roomName.includes(ROOM_ORDER[i])) return i;
+  }
+  return ROOM_ORDER.length;
+}
+function sortRooms(rooms){
+  return rooms
+    .map((room, idx) => ({ room, idx }))
+    .sort((a, b) => (roomSortKey(a.room) - roomSortKey(b.room)) || (a.idx - b.idx))
+    .map(x => x.room);
+}
 
 const ANA_HOTEL = DB.fit_ana.hotel;
 const PRINCE_HOTEL = DB.fit_prince.hotel;
@@ -169,7 +165,14 @@ function surchargeFor(row, dow){
   return 0;
 }
 
+/**
+ * Works out the room base/surcharge to use, the FIT surtax (diff) to add,
+ * and whether this booking counts as FIT (individual/small group) or
+ * 団体 (group) pricing, given the hotel's own rules.
+ * Returns { ok:true, row, diff, mode } or { ok:false, reason }
+ */
 function resolveQuote(hotel, room, dateStr, guests){
+  // ソラリア西鉄: FIT has its own completely separate price table
   if(hotel === SOLARIA_HOTEL && guests <= DB.fit_solaria.threshold){
     const row = findRowIn(DB.fit_solaria.price, hotel, room, dateStr);
     if(!row) return { ok:false, reason:'no_data' };
@@ -177,6 +180,8 @@ function resolveQuote(hotel, room, dateStr, guests){
     return { ok:true, row, diff:0, mode:'FIT' };
   }
 
+  // everyone else (including ソラリア西鉄 when over its FIT threshold)
+  // starts from the 団体(group) table
   const groupRow = findPriceRow(hotel, room, dateStr);
   if(!groupRow) return { ok:false, reason:'no_data' };
   if(isClosedRow(groupRow)) return { ok:false, reason:'closed' };
@@ -197,6 +202,7 @@ function resolveQuote(hotel, room, dateStr, guests){
     return { ok:true, row:groupRow, diff, mode:'FIT' };
   }
 
+  // standard single-rule hotels (includes ソラリア西鉄 above its FIT threshold)
   const entry = DB.fit_simple[hotel];
   if(entry && entry.threshold > 0 && guests <= entry.threshold){
     return { ok:true, row:groupRow, diff:entry.amount, mode:'FIT' };
@@ -212,9 +218,9 @@ function renderVoid(title, msg){
     </div>`;
 }
 
-function renderResult(hotel, room, dateStr, guests, quote){
+function computeFinalPrice(hotel, dateStr, quote){
   const dow = weekdayIndexUTC(dateStr);
-  const { row, diff, mode } = quote;
+  const { row, diff } = quote;
   const surcharge = surchargeFor(row, dow);
 
   const preTax = row.base + surcharge + diff;
@@ -222,52 +228,68 @@ function renderResult(hotel, room, dateStr, guests, quote){
   const accTax = getAccommodationTax(hotel, afterTax);
   const bathTax = getBathTax(hotel);
   const totalBeforeRound = afterTax + accTax + bathTax;
-  const finalPrice = Math.ceil(totalBeforeRound / 100) * 100;
+  return Math.ceil(totalBeforeRound / 100) * 100;
+}
+
+function renderResults(hotel, dateStr, guests, roomResults){
+  const cardsHtml = roomResults.map(({ room, quote }) => {
+    if(!quote.ok){
+      const msg = quote.reason === 'closed' ? '休館日' : '情報なし';
+      return `
+        <div class="room-card room-card--empty">
+          <div class="room-info">
+            <span class="room-name">${room}</span>
+          </div>
+          <span class="room-empty-msg">${msg}</span>
+        </div>`;
+    }
+    const finalPrice = computeFinalPrice(hotel, dateStr, quote);
+    return `
+      <div class="room-card">
+        <div class="room-info">
+          <span class="room-name">${room}</span>
+        </div>
+        <span class="room-price">¥${fmt(finalPrice)}</span>
+      </div>`;
+  }).join('');
 
   resultPanel.innerHTML = `
     <div class="result-card">
       <div class="badges">
         <span class="badge hotel">${hotel}</span>
-        <span class="badge">${room}</span>
         <span class="badge">${dateStr}</span>
         <span class="badge">${guests}名</span>
       </div>
-      <div class="price-block">
-        <div class="label">ご宿泊料金（最終）</div>
-        <div class="amount">¥${fmt(finalPrice)}</div>
-        <div class="caption">税・宿泊税・入湯税 込み</div>
+      <div class="room-results">
+        ${cardsHtml}
       </div>
+      <div class="results-caption">税・宿泊税・入湯税 込み</div>
       <div class="note">※ 表示された料金には、人数に応じたFIT/団体の追加料金判定が反映されています。</div>
     </div>`;
 }
 
 goBtn.addEventListener('click', () => {
   const hotel = hotelSel.value;
-  const room = roomSel.value;
   const dateStr = selectedDate;
   const guests = parseInt(guestInput.value, 10);
 
-  if(!hotel || !room || !dateStr || !guests || guests < 1){
-    renderVoid('!', 'ホテル・お部屋タイプ・チェックイン日・人数をすべて選択、入力してください。');
+  if(!hotel || !dateStr || !guests || guests < 1){
+    renderVoid('!', 'ホテル・チェックイン日・人数をすべて選択、入力してください。');
     return;
   }
 
-  const quote = resolveQuote(hotel, room, dateStr, guests);
-  if(!quote.ok){
-    if(quote.reason === 'closed'){
-      renderVoid('休', `選択された日付（${dateStr}）は <strong>${hotel}</strong> の休館日として登録されているため、料金を計算できません。`);
-    } else {
-      renderVoid('無', `<strong>${hotel} ・ ${room}</strong> の <strong>${dateStr}</strong> の料金情報が見つかりませんでした。日付をご確認ください。`);
-    }
+  const rooms = sortRooms(hotelRooms[hotel] || []);
+  if(rooms.length === 0){
+    renderVoid('無', `<strong>${hotel}</strong> のお部屋情報が見つかりませんでした。`);
     return;
   }
-  renderResult(hotel, room, dateStr, guests, quote);
+
+  const roomResults = rooms.map(room => ({ room, quote: resolveQuote(hotel, room, dateStr, guests) }));
+  renderResults(hotel, dateStr, guests, roomResults);
 });
 
 logoBtn.addEventListener('click', () => {
   hotelSel.value = '';
-  roomSel.innerHTML = '<option value="">先にホテルを選んでください</option>';
-  roomSel.disabled = true;
   guestInput.value = '';
   selectedDate = null;
   initCalendarView();
