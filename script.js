@@ -16,7 +16,6 @@ const logoBtn = document.getElementById('logoBtn');
 
 const PLACEHOLDER_HTML = `
   <div class="placeholder" id="placeholder">
-    <div class="ic">🏨</div>
     <p>左の項目を選択すると<br>ここに最終料金が表示されます</p>
   </div>`;
 
@@ -247,7 +246,7 @@ function renderResult(hotel, room, dateStr, guests, quote){
       <div class="price-block">
         <div class="label">ご宿泊料金（最終）</div>
         <div class="amount">¥${fmt(finalPrice)}</div>
-        <div class="caption">税・宿泊税・入湯税 込み / 100円単位切り上げ</div>
+        <div class="caption">税・宿泊税・入湯税 込み</div>
       </div>
       <div class="note">※ 表示された料金には、人数に応じたFIT/団体の追加料金判定が反映されています。</div>
     </div>`;
