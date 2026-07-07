@@ -342,7 +342,6 @@ font-size:13px;
 font-weight:600;
 line-height:1.7;
 }
-.placeholder .ph-text-mobile{ display:none; }
 
 .result-card{
 width:100%;
@@ -367,27 +366,75 @@ color:var(--ink-soft);
 }
 .badge.hotel{ color:var(--ink); }
 
-.price-block{
+/* ---- room result cards (one per room type) ---- */
+.room-results{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+.room-card{
 background:var(--white);
 border-radius:18px;
-padding:34px 20px 30px;
+padding:22px 20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:6px;
+text-align:center;
+border:1.5px solid transparent;
+transition:border-color .15s ease;
 }
-.price-block .label{
-font-size:12.5px;
+.room-card:hover{ border-color:var(--accent-tint); }
+.room-card .room-info{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:4px;
+min-width:0;
+}
+.room-card .room-name{
+font-size:19px;
 font-weight:700;
 color:var(--ink-soft);
-margin-bottom:10px;
-letter-spacing:0.02em;
+letter-spacing:0.03em;
 }
-.price-block .amount{
-font-family:'IBM Plex Mono', monospace;
-font-size:44px;
+.room-card .room-mode{
+font-size:10.5px;
 font-weight:700;
-color:var(--accent);
-line-height:1.1;
+color:var(--ink-soft);
+background:var(--surface);
+padding:2px 8px;
+border-radius:999px;
+width:fit-content;
 }
-.price-block .caption{
-margin-top:12px;
+.room-card .room-price{
+font-family:'IBM Plex Mono', monospace;
+font-size:48px;
+font-weight:800;
+color:var(--accent);
+letter-spacing:-0.02em;
+line-height:1.05;
+white-space:nowrap;
+}
+.room-card.room-card--empty{
+opacity:0.55;
+padding:16px 20px;
+}
+.room-card.room-card--empty .room-empty-msg{
+font-size:13px;
+font-weight:600;
+color:var(--void);
+}
+
+@media (max-width: 760px){
+.room-card{ padding:18px 16px; }
+.room-card .room-price{ font-size:38px; }
+.room-card .room-name{ font-size:16px; }
+}
+
+.results-caption{
+margin-top:14px;
 font-size:11.5px;
 font-weight:500;
 color:var(--void);
@@ -424,9 +471,3 @@ color:var(--ink-soft);
 line-height:1.8;
 }
 .void-card p strong{ color:var(--ink); }
-
-/* mobile: swap "left" placeholder text for "above", since the panel stacks on top on narrow screens */
-@media (max-width: 760px){
-.placeholder .ph-text-pc{ display:none; }
-.placeholder .ph-text-mobile{ display:inline; }
-}
