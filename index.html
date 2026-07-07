@@ -19,17 +19,13 @@
 <div class="stage">
 <div class="intro">
 <h1>ホテル料金照会</h1>
-<p>ホテル・お部屋タイプ・チェックイン日を選ぶと、税・宿泊税・入湯税込みの最終料金がすぐに分かります。</p>
+<p>ホテル・チェックイン日・人数を選ぶと、税・宿泊税・入湯税込みの最終料金を全お部屋タイプまとめて表示します。</p>
 </div>
 <div class="grid">
 <div class="panel">
 <div class="field">
 <label for="hotelSel">ホテル</label>
 <select id="hotelSel"><option value="">-- ホテルを選択 --</option></select>
-</div>
-<div class="field">
-<label for="roomSel">お部屋タイプ</label>
-<select id="roomSel" disabled><option value="">先にホテルを選んでください</option></select>
 </div>
 <div class="field">
 <label for="guestInput">人数</label>
@@ -53,7 +49,7 @@
 <div class="contact-box">
 <div class="divider"></div>
 <div class="cb-title"><span class="dot"></span>掲載のないホテルはこちら</div>
-<p>リストにないホテルの料金や、その他ご不明な点がございましたら、電話/NateOn/kakaotalkにてお問い合わせください。</p>
+<p>リストにないホテルの料金や、その他ご不明な点がございましたら、下記までお問い合わせください。</p>
 <div class="cb-rows">
 <div class="cb-row">
 <span class="cb-label" aria-label="電話" style="color:#f3543f"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></span>
@@ -64,7 +60,7 @@
 </div>
 <div class="resultPanel" id="resultPanel">
 <div class="placeholder" id="placeholder">
-<p><span class="ph-text-pc">左の項目を選択すると</span><span class="ph-text-mobile">上の項目を選択すると</span><br>ここに最終料金が表示されます</p>
+<p>左の項目を選択すると<br>ここに最終料金が表示されます</p>
 </div>
 </div>
 </div>
