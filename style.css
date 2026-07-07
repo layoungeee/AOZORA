@@ -342,6 +342,7 @@ font-size:13px;
 font-weight:600;
 line-height:1.7;
 }
+.placeholder .ph-text-mobile{ display:none; }
 
 .result-card{
 width:100%;
@@ -471,3 +472,9 @@ color:var(--ink-soft);
 line-height:1.8;
 }
 .void-card p strong{ color:var(--ink); }
+
+/* mobile: swap "left" placeholder text for "above", since the panel stacks on top on narrow screens */
+@media (max-width: 760px){
+.placeholder .ph-text-pc{ display:none; }
+.placeholder .ph-text-mobile{ display:inline; }
+}
