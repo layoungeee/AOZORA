@@ -14,7 +14,7 @@ const logoBtn = document.getElementById('logoBtn');
 
 const PLACEHOLDER_HTML = `
   <div class="placeholder" id="placeholder">
-    <p>左の項目を選択すると<br>ここに最終料金が表示されます</p>
+    <p><span class="ph-text-pc">左の項目を選択すると</span><span class="ph-text-mobile">上の項目を選択すると</span><br>ここに最終料金が表示されます</p>
   </div>`;
 
 DB.hotels.forEach(h => {
