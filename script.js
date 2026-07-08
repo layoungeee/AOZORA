@@ -166,10 +166,9 @@ function surchargeFor(row, dow){
 }
 
 /**
- * Works out the room base/surcharge to use, the FIT surtax (diff) to add,
- * and whether this booking counts as FIT (individual/small group) or
- * 団体 (group) pricing, given the hotel's own rules.
- * Returns { ok:true, row, diff, mode } or { ok:false, reason }
+ * Works out the room base/surcharge to use and the FIT surtax (diff) to add,
+ * given the hotel's own FIT/団体(group) rules.
+ * Returns { ok:true, row, diff } or { ok:false, reason }
  */
 function resolveQuote(hotel, room, dateStr, guests){
   // ソラリア西鉄: FIT has its own completely separate price table
@@ -177,7 +176,7 @@ function resolveQuote(hotel, room, dateStr, guests){
     const row = findRowIn(DB.fit_solaria.price, hotel, room, dateStr);
     if(!row) return { ok:false, reason:'no_data' };
     if(isClosedRow(row)) return { ok:false, reason:'closed' };
-    return { ok:true, row, diff:0, mode:'FIT' };
+    return { ok:true, row, diff:0 };
   }
 
   // everyone else (including ソラリア西鉄 when over its FIT threshold)
@@ -187,27 +186,27 @@ function resolveQuote(hotel, room, dateStr, guests){
   if(isClosedRow(groupRow)) return { ok:false, reason:'closed' };
 
   if(hotel === ANA_HOTEL){
-    if(guests > DB.fit_ana.threshold) return { ok:true, row:groupRow, diff:0, mode:'団体' };
+    if(guests > DB.fit_ana.threshold) return { ok:true, row:groupRow, diff:0 };
     const tier = DB.fit_ana.tiers.find(t => guests >= t.min && guests <= t.max);
     const diff = tier ? tier.amount : 0;
-    return { ok:true, row:groupRow, diff, mode:'FIT' };
+    return { ok:true, row:groupRow, diff };
   }
 
   if(hotel === PRINCE_HOTEL){
-    if(guests > DB.fit_prince.threshold) return { ok:true, row:groupRow, diff:0, mode:'団体' };
-    const roomKey = (room === 'シングル') ? 'シングル' : 'ツイン・トリプル';
+    if(guests > DB.fit_prince.threshold) return { ok:true, row:groupRow, diff:0 };
+    const roomKey = room === 'シングル' ? room : 'ツイン・トリプル';
     const special = dateStr >= DB.fit_prince.special_start && dateStr <= DB.fit_prince.special_end;
     const bracket = DB.fit_prince.rooms[roomKey];
     const diff = bracket ? (special ? bracket.special : bracket.normal) : 0;
-    return { ok:true, row:groupRow, diff, mode:'FIT' };
+    return { ok:true, row:groupRow, diff };
   }
 
   // standard single-rule hotels (includes ソラリア西鉄 above its FIT threshold)
   const entry = DB.fit_simple[hotel];
   if(entry && entry.threshold > 0 && guests <= entry.threshold){
-    return { ok:true, row:groupRow, diff:entry.amount, mode:'FIT' };
+    return { ok:true, row:groupRow, diff:entry.amount };
   }
-  return { ok:true, row:groupRow, diff:0, mode:'団体' };
+  return { ok:true, row:groupRow, diff:0 };
 }
 
 function renderVoid(title, msg){
