@@ -263,7 +263,7 @@ function renderResults(hotel, dateStr, guests, roomResults){
   const fitThreshold = FIT_UNCERTAIN_HOTELS[hotel];
   const showFitNote = fitThreshold !== undefined && guests <= fitThreshold;
   const fitNoteHtml = showFitNote
-    ? `<div class="top-notes"><div class="top-note">"FIT料金は予想金額のため、多少の誤差がある場合がございます。</div></div>`
+    ? `<div class="top-notes"><div class="top-note">FIT料金は予想金額のため、多少の誤差がある場合がございます。</div></div>`
     : '';
 
   resultPanel.innerHTML = `
