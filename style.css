@@ -332,6 +332,23 @@ color:var(--ink-soft);
 }
 .badge.hotel{ color:var(--ink); }
 
+/* ---- hotel-level caution note (e.g. FIT price may be inaccurate) ---- */
+.top-notes{
+margin-bottom:14px;
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+.top-note{
+background:var(--accent-tint);
+color:var(--accent-deep);
+font-size:12px;
+font-weight:600;
+padding:8px 12px;
+border-radius:10px;
+line-height:1.6;
+}
+
 /* ---- room result cards (one per room type) ---- */
 .room-results{
 display:flex;
