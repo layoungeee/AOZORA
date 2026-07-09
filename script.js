@@ -128,6 +128,14 @@ const ANA_HOTEL = DB.fit_ana.hotel;
 const PRINCE_HOTEL = DB.fit_prince.hotel;
 const SOLARIA_HOTEL = DB.fit_solaria.hotel;
 
+// FIT pricing at these hotels can be less reliable than the group rate, so
+// show a caution note whenever the guest count falls into their FIT range.
+const FIT_UNCERTAIN_HOTELS = {
+  '登別万世閣': 14,
+  '洞爺万世閣': 14,
+  [DB.fit_ana.hotel]: DB.fit_ana.threshold
+};
+
 function findRowIn(list, hotel, room, dateStr){
   return list.find(p => p.hotel === hotel && p.room === room && p.start <= dateStr && p.end >= dateStr) || null;
 }
@@ -252,6 +260,12 @@ function renderResults(hotel, dateStr, guests, roomResults){
       </div>`;
   }).join('');
 
+  const fitThreshold = FIT_UNCERTAIN_HOTELS[hotel];
+  const showFitNote = fitThreshold !== undefined && guests <= fitThreshold;
+  const fitNoteHtml = showFitNote
+    ? `<div class="top-notes"><div class="top-note">FIT料金の場合、表示金額が実際の料金と異なる場合がございます。</div></div>`
+    : '';
+
   resultPanel.innerHTML = `
     <div class="result-card">
       <div class="badges">
@@ -259,6 +273,7 @@ function renderResults(hotel, dateStr, guests, roomResults){
         <span class="badge">${dateStr}</span>
         <span class="badge">${guests}名</span>
       </div>
+      ${fitNoteHtml}
       <div class="room-results">
         ${cardsHtml}
       </div>
