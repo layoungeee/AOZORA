@@ -17,7 +17,38 @@ const PLACEHOLDER_HTML = `
     <p><span class="ph-text-pc">左の項目を選択すると</span><span class="ph-text-mobile">上の項目を選択すると</span><br>ここに最終料金が表示されます</p>
   </div>`;
 
-DB.hotels.forEach(h => {
+// Japanese reading (yomi) for each hotel, used only to sort the dropdown
+// in natural あいうえお order (kanji/romaji names don't sort correctly on their own).
+const HOTEL_YOMI = {
+  'アートホテル旭川': 'あーとほてるあさひかわ',
+  'アパリゾート': 'あぱりぞーと',
+  'イビス': 'いびす',
+  'ANAクラウンプラザホテル 千歳': 'えーえぬえーくらうんぷらざほてるちとせ',
+  'ガトーキングダム': 'がとーきんぐだむ',
+  '札幌プリンス': 'さっぽろぷりんす',
+  'サンパレス': 'さんぱれす',
+  '白金パークヒルズ': 'しろがねぱーくひるず',
+  'JRタワー日航': 'じぇーあーるたわーにっこう',
+  '定山渓鹿の湯': 'じょうざんけいしかのゆ',
+  '定山渓ビューホテル': 'じょうざんけいびゅーほてる',
+  '定山渓万世閣': 'じょうざんけいまんせいかく',
+  'ソラリア西鉄': 'そらりあせいてつ',
+  '大雪(層雲峡）': 'たいせつそううんきょう',
+  'ツバキ': 'つばき',
+  '洞爺万世閣': 'とうやまんせいかく',
+  'ニューオータニイン': 'にゅーおーたにいん',
+  '登別万世閣': 'のぼりべつまんせいかく',
+  '函館望楼NOGUCHI': 'はこだてぼうろうのぐち',
+  'マイステイズプレミア札幌パーク': 'まいすていずぷれみあさっぽろぱーく',
+  'まほろば': 'まほろば',
+  'プレミアホテル中島公園': 'ぷれみあほてるなかじまこうえん',
+};
+const hotelsSorted = [...DB.hotels].sort((a, b) => {
+  const ya = HOTEL_YOMI[a] || a, yb = HOTEL_YOMI[b] || b;
+  return ya.localeCompare(yb, 'ja');
+});
+
+hotelsSorted.forEach(h => {
   const opt = document.createElement('option');
   opt.value = h; opt.textContent = h;
   hotelSel.appendChild(opt);
