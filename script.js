@@ -167,6 +167,11 @@ const FIT_UNCERTAIN_HOTELS = {
   [DB.fit_ana.hotel]: DB.fit_ana.threshold
 };
 
+// General notes shown whenever this hotel is selected, regardless of guest count.
+const HOTEL_GENERAL_NOTES = {
+  'JRタワー日航札幌': 'こちらの料金はモデレートツインを基準に算出しています。'
+};
+
 function findRowIn(list, hotel, room, dateStr){
   return list.find(p => p.hotel === hotel && p.room === room && p.start <= dateStr && p.end >= dateStr) || null;
 }
@@ -292,10 +297,16 @@ function renderResults(hotel, dateStr, guests, roomResults){
       </div>`;
   }).join('');
 
+  const topNotesArr = [];
   const fitThreshold = FIT_UNCERTAIN_HOTELS[hotel];
-  const showFitNote = fitThreshold !== undefined && guests <= fitThreshold;
-  const fitNoteHtml = showFitNote
-    ? `<div class="top-notes"><div class="top-note">FIT料金は予想金額のため、多少の誤差がある場合がございます。</div></div>`
+  if(fitThreshold !== undefined && guests <= fitThreshold){
+    topNotesArr.push('FIT料金は予想金額のため、多少の誤差がある場合がございます。');
+  }
+  if(HOTEL_GENERAL_NOTES[hotel]){
+    topNotesArr.push(HOTEL_GENERAL_NOTES[hotel]);
+  }
+  const fitNoteHtml = topNotesArr.length
+    ? `<div class="top-notes">${topNotesArr.map(n => `<div class="top-note">${n}</div>`).join('')}</div>`
     : '';
 
   resultPanel.innerHTML = `
